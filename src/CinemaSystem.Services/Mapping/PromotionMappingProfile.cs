@@ -41,6 +41,7 @@ public sealed class PromotionMappingProfile : Profile
 
         CreateMap<PromotionUsage, PromotionUsageResponse>()
             .ForMember(dest => dest.PromoCode, opt => opt.MapFrom(src => src.Promotion.PromoCode))
-            .ForMember(dest => dest.PromotionName, opt => opt.MapFrom(src => src.Promotion.Name));
+            .ForMember(dest => dest.PromotionName, opt => opt.MapFrom(src => src.Promotion.Name))
+            .ForMember(dest => dest.CustomerId, opt => opt.MapFrom(src => src.CustomerId));
     }
 }

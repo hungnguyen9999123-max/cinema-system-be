@@ -29,5 +29,5 @@ public interface IPromotionService
 
     Task<ValidatePromotionResponse> ValidateAsync(Guid? customerId, ValidatePromotionRequest request, CancellationToken cancellationToken = default);
 
-    Task RecordUsageAsync(Guid bookingId, Guid customerId, Guid promotionId, CancellationToken cancellationToken = default);
+    Task RecordUsageAsync(Guid bookingId, Guid? customerId, Guid promotionId, CancellationToken cancellationToken = default);
 }

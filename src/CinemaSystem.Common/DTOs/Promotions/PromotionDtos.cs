@@ -113,7 +113,7 @@ public sealed record PromotionUsageResponse(
     Guid PromotionId,
     string PromoCode,
     string PromotionName,
-    Guid CustomerId,
+    Guid? CustomerId,
     Guid BookingId,
     DateTime UsedAt);
 
