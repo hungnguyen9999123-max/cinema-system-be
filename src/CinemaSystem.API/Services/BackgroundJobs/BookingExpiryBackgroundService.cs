@@ -41,12 +41,25 @@ public class BookingExpiryBackgroundService : BackgroundService
                     _logger.LogInformation("Expired {Count} pending bookings.", processed);
                 }
             }
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                _logger.LogInformation("BookingExpiryBackgroundService is stopping gracefully.");
+                break;
+            }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error occurred executing BookingExpiryBackgroundService.");
             }
 
-            await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
+            try
+            {
+                await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
+            }
+            catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+            {
+                _logger.LogInformation("BookingExpiryBackgroundService is stopping gracefully.");
+                break;
+            }
         }
     }
 
