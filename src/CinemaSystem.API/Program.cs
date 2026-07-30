@@ -196,8 +196,8 @@ builder.Services.AddScoped<IWalletTopUpService, WalletTopUpService>();
 builder.Services.AddScoped<IRefundAuditService, RefundAuditService>();
 builder.Services.AddScoped<IRefundNotificationService, RefundNotificationService>();
 
-//builder.Services.AddHostedService<BookingExpiryBackgroundService>();
-//builder.Services.AddHostedService<ShowtimeCompletionBackgroundService>();
+builder.Services.AddHostedService<BookingExpiryBackgroundService>();
+builder.Services.AddHostedService<ShowtimeCompletionBackgroundService>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
