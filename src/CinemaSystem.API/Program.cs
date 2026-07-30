@@ -196,8 +196,8 @@ builder.Services.AddScoped<IWalletTopUpService, WalletTopUpService>();
 builder.Services.AddScoped<IRefundAuditService, RefundAuditService>();
 builder.Services.AddScoped<IRefundNotificationService, RefundNotificationService>();
 
-builder.Services.AddHostedService<BookingExpiryBackgroundService>();
-builder.Services.AddHostedService<ShowtimeCompletionBackgroundService>();
+//builder.Services.AddHostedService<BookingExpiryBackgroundService>();
+//builder.Services.AddHostedService<ShowtimeCompletionBackgroundService>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -343,6 +343,13 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-var port = Environment.GetEnvironmentVariable("PORT") ?? "8080";
-app.Urls.Clear();
-app.Urls.Add($"http://0.0.0.0:{port}");
+var port = Environment.GetEnvironmentVariable("PORT");
+
+if (!string.IsNullOrWhiteSpace(port))
+{
+    app.Run($"http://0.0.0.0:{port}");
+}
+else
+{
+    app.Run();
+}
