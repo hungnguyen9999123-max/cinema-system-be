@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "CinemaSystem.Common": {
+      "commandName": "Project"
+    },
+    "Profile 1": {
+      "commandName": "Executable"
+    }
+  }
+}

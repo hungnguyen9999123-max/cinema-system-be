@@ -1,0 +1,4 @@
+$url = 'https://sandbox.vnpayment.vn/paymentv2/vpcpay.html?vnp_Amount=1500000&vnp_Command=pay&vnp_CreateDate=20260728084007&vnp_CurrCode=VND&vnp_ExpireDate=20260728091007&vnp_IpAddr=127.0.0.1&vnp_Locale=vn&vnp_OrderInfo=Thanh+toan+F%26B+order+93d6ad61&vnp_OrderType=other&vnp_ReturnUrl=https%3A%2F%2Fflap-spotless-enclosure.ngrok-free.dev%2Fapi%2Fpayments%2Fvnpay%2Ffnb-pos-return&vnp_TmnCode=H45COC5D&vnp_TxnRef=23203b4d5be04faa8ee246c5132069c0&vnp_Version=2.1.0&vnp_SecureHash=39684aa98309227f670ae19e791855484889d7e5b78ee12371006672447e64e7e5d68f6166c5548430a5c991dd1244a1d0f797796cfa0d851c8e98b2ceaa7963'
+$out = "$env:TEMP\vnpay-fnb.html"
+curl -s -L $url -o $out
+Select-String -Path $out -Pattern "Sai ch|error|Error|cardNumber|btn-payment" -CaseSensitive:$false | Select-Object -First 10

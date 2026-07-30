@@ -1,0 +1,52 @@
+IF COL_LENGTH('MOVIES', 'banner_url') IS NULL
+    ALTER TABLE MOVIES ADD banner_url nvarchar(max) NULL;
+
+IF COL_LENGTH('MOVIES', 'banner_public_id') IS NULL
+    ALTER TABLE MOVIES ADD banner_public_id nvarchar(max) NULL;
+
+IF COL_LENGTH('MOVIES', 'poster_public_id') IS NULL
+    ALTER TABLE MOVIES ADD poster_public_id nvarchar(max) NULL;
+
+IF EXISTS (
+    SELECT 1
+    FROM sys.check_constraints
+    WHERE parent_object_id = OBJECT_ID('BOOKING_SEATS')
+      AND name = 'CK_BS_STATUS'
+)
+    ALTER TABLE BOOKING_SEATS DROP CONSTRAINT CK_BS_STATUS;
+
+ALTER TABLE BOOKING_SEATS
+ADD CONSTRAINT CK_BS_STATUS
+CHECK (seat_status IN ('HELD', 'BOOKED', 'CONFIRMED', 'RELEASED'));
+
+IF EXISTS (
+    SELECT 1
+    FROM sys.check_constraints
+    WHERE parent_object_id = OBJECT_ID('PAYMENTS')
+      AND name = 'CK_PAY_STATUS'
+)
+    ALTER TABLE PAYMENTS DROP CONSTRAINT CK_PAY_STATUS;
+
+ALTER TABLE PAYMENTS
+ADD CONSTRAINT CK_PAY_STATUS
+CHECK (status IN ('PENDING', 'PAID', 'SUCCESS', 'FAILED', 'REFUNDED'));
+
+IF EXISTS (
+    SELECT 1
+    FROM sys.key_constraints
+    WHERE parent_object_id = OBJECT_ID('BOOKING_SEATS')
+      AND name = 'UQ_BS_SEAT_SHOWTIME'
+)
+    ALTER TABLE BOOKING_SEATS DROP CONSTRAINT UQ_BS_SEAT_SHOWTIME;
+
+IF EXISTS (
+    SELECT 1
+    FROM sys.indexes
+    WHERE object_id = OBJECT_ID('BOOKING_SEATS')
+      AND name = 'UQ_BS_SEAT_SHOWTIME'
+)
+    DROP INDEX UQ_BS_SEAT_SHOWTIME ON BOOKING_SEATS;
+
+CREATE UNIQUE INDEX UQ_BS_SEAT_SHOWTIME
+ON BOOKING_SEATS(seat_id, showtime_id)
+WHERE seat_status IN ('HELD', 'BOOKED', 'CONFIRMED');

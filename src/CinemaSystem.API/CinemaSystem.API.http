@@ -1,0 +1,60 @@
+@CinemaSystem.API_HostAddress = http://localhost:5293
+
+GET {{CinemaSystem.API_HostAddress}}/api/movies?query=action&page=1&pageSize=20
+Accept: application/json
+
+###
+
+GET {{CinemaSystem.API_HostAddress}}/api/movies/00000000-0000-0000-0000-000000000000
+Accept: application/json
+
+###
+
+POST {{CinemaSystem.API_HostAddress}}/api/movies
+Content-Type: application/json
+
+{
+  "createdBy": "11111111-1111-1111-1111-111111111111",
+  "title": "Example Movie",
+  "genre": "Action",
+  "language": "English",
+  "durationMin": 120,
+  "releaseDate": "2026-06-09",
+  "synopsis": "An example movie.",
+  "ageRating": "PG-13",
+  "trailerUrl": "https://example.com/trailer",
+  "status": "UPCOMING"
+}
+
+###
+
+PUT {{CinemaSystem.API_HostAddress}}/api/movies/00000000-0000-0000-0000-000000000000
+Content-Type: application/json
+
+{
+  "title": "Updated Movie",
+  "genre": "Drama",
+  "language": "English",
+  "durationMin": 125,
+  "releaseDate": "2026-06-10",
+  "synopsis": "Updated synopsis.",
+  "ageRating": "PG-13",
+  "trailerUrl": "https://example.com/trailer",
+  "status": "NOW_SHOWING"
+}
+
+###
+
+POST {{CinemaSystem.API_HostAddress}}/api/movies/00000000-0000-0000-0000-000000000000/poster
+Content-Type: multipart/form-data; boundary=PosterBoundary
+
+--PosterBoundary
+Content-Disposition: form-data; name="poster"; filename="poster.jpg"
+Content-Type: image/jpeg
+
+< ./poster.jpg
+--PosterBoundary--
+
+###
+
+DELETE {{CinemaSystem.API_HostAddress}}/api/movies/00000000-0000-0000-0000-000000000000

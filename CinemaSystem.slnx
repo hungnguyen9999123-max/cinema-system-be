@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/CinemaSystem.API/CinemaSystem.API.csproj" />
+    <Project Path="src/CinemaSystem.Common/CinemaSystem.Common.csproj" />
+    <Project Path="src/CinemaSystem.DAL/CinemaSystem.DAL.csproj" />
+    <Project Path="src/CinemaSystem.Services/CinemaSystem.Services.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/CinemaSystem.RefundFlowTests/CinemaSystem.RefundFlowTests.csproj" />
+  </Folder>
+</Solution>

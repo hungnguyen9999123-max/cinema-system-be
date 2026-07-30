@@ -1,0 +1,25 @@
+SET XACT_ABORT ON;
+SET ANSI_NULLS ON;
+SET QUOTED_IDENTIFIER ON;
+GO
+
+BEGIN TRANSACTION;
+GO
+
+-- Preserve every gateway accepted by the pre-wallet schema and add the
+-- internal CINE-MAX wallet gateway used for atomic checkout.
+IF OBJECT_ID(N'dbo.CK_PAY_GATEWAY', N'C') IS NOT NULL
+BEGIN
+    ALTER TABLE dbo.PAYMENTS DROP CONSTRAINT CK_PAY_GATEWAY;
+END
+GO
+
+ALTER TABLE dbo.PAYMENTS WITH CHECK
+ADD CONSTRAINT CK_PAY_GATEWAY CHECK
+(
+    gateway IN ('CARD', 'CASH', 'ZALOPAY', 'MOMO', 'VNPAY', 'WALLET')
+);
+GO
+
+COMMIT TRANSACTION;
+GO
