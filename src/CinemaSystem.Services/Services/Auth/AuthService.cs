@@ -18,10 +18,12 @@ public sealed class AuthService : IAuthService
     private const int EmailVerificationLifetimeMinutes = 30;
     private const int DefaultMaxFailedLoginAttempts = 5;
     private const int DefaultAccountLockoutMinutes = 15;
-    private const string DefaultBackendBaseUrl = "http://localhost:5293";
-    private const string DefaultFrontendBaseUrl = "http://localhost:5173";
-    private const string DefaultVerificationSuccessUrl = "http://localhost:5173/successfully-verify";
-    private const string DefaultVerificationFailureBaseUrl = "http://localhost:5173/verify-fail";
+
+    private const string DefaultBackendBaseUrl = "https://cinema-system-be.onrender.com";
+    private const string DefaultFrontendBaseUrl = "https://215ca35c.cinema-system-fe.pages.dev";
+    private const string DefaultVerificationSuccessUrl = "https://215ca35c.cinema-system-fe.pages.dev/successfully-verify";
+    private const string DefaultVerificationFailureBaseUrl = "https://215ca35c.cinema-system-fe.pages.dev/verify-fail";
+
     private const string GoogleProvider = "GOOGLE";
     private const string LocalProvider = "LOCAL";
 
