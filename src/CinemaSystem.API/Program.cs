@@ -28,6 +28,7 @@ using CinemaSystem.Services.Services.Rooms;
 using CinemaSystem.Services.Services.PricingRules;
 using CinemaSystem.Services.Services.Showtimes;
 using CinemaSystem.Services.Services.Chat;
+using CinemaSystem.Services.Services.AiChat;
 using CinemaSystem.DAL.Repository.Bookings;
 using CinemaSystem.DAL.Repository.Promotions;
 using CinemaSystem.DAL.Repository.Payments;
@@ -244,6 +245,16 @@ builder.Services.AddSignalR(options =>
 });
 builder.Services.AddScoped<IChatRepository, ChatRepository>();
 builder.Services.AddScoped<IChatService, ChatService>();
+
+// AI Chat Service
+builder.Services.AddScoped<IAiChatService>(sp =>
+{
+    var movieRepo = sp.GetRequiredService<IMovieRepository>();
+    var showtimeRepo = sp.GetRequiredService<IShowtimeRepository>();
+    var movieService = sp.GetRequiredService<IMovieService>();
+    var fnbRepo = sp.GetRequiredService<IFnbItemRepository>();
+    return new AiChatService(movieRepo, showtimeRepo, movieService, fnbRepo);
+});
 
 builder.Services.AddRateLimiter(options =>
 {
