@@ -19,6 +19,7 @@ using CinemaSystem.DAL.Repository.PricingRules;
 using CinemaSystem.DAL.Repository.AudienceTypes;
 using CinemaSystem.DAL.Repository.Showtimes;
 using CinemaSystem.DAL.Repositories.Movies;
+using CinemaSystem.DAL.Repository.Chat;
 using CinemaSystem.Services.Services.Auth;
 using CinemaSystem.Services.Services.Cinemas;
 using CinemaSystem.Services.Services.Fnb;
@@ -26,6 +27,7 @@ using CinemaSystem.Services.Services.Movies;
 using CinemaSystem.Services.Services.Rooms;
 using CinemaSystem.Services.Services.PricingRules;
 using CinemaSystem.Services.Services.Showtimes;
+using CinemaSystem.Services.Services.Chat;
 using CinemaSystem.DAL.Repository.Bookings;
 using CinemaSystem.DAL.Repository.Promotions;
 using CinemaSystem.DAL.Repository.Payments;
@@ -49,10 +51,12 @@ using CinemaSystem.DAL.Infrastructure;
 using CinemaSystem.API.Services.BackgroundJobs;
 using CinemaSystem.Services.Services.Uploads;
 using CinemaSystem.Services.Mapping;
+using CinemaSystem.API.Hubs;
 using FluentValidation;
 using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
@@ -97,9 +101,9 @@ builder.Services.AddCors(options =>
 
                 var isLocalDevelopmentOrigin =
                     builder.Environment.IsDevelopment()
-                    && uri.Scheme == Uri.UriSchemeHttp
+                    && (uri.Scheme == Uri.UriSchemeHttp || uri.Scheme == Uri.UriSchemeHttps)
                     && uri.Host.Equals("localhost", StringComparison.OrdinalIgnoreCase)
-                    && uri.Port == 5173;
+                    && (uri.Port == 5173 || uri.Port > 5000); // Cho phép mọi port dev
 
                 return isCloudflarePagesOrigin || isLocalDevelopmentOrigin;
             })
@@ -213,9 +217,33 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"] ?? string.Empty)),
             RoleClaimType = System.Security.Claims.ClaimTypes.Role
         };
+        // SignalR JWT Authentication
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                var accessToken = context.Request.Query["access_token"];
+                var path = context.HttpContext.Request.Path;
+                if (!string.IsNullOrEmpty(accessToken) && path.StartsWithSegments("/hubs"))
+                {
+                    context.Token = accessToken;
+                }
+                return Task.CompletedTask;
+            }
+        };
     });
 
 builder.Services.AddAuthorization();
+
+// Chat Module - SignalR
+builder.Services.AddSignalR(options =>
+{
+    options.EnableDetailedErrors = builder.Environment.IsDevelopment();
+    options.MaximumReceiveMessageSize = 32 * 1024; // 32KB
+    options.StreamBufferCapacity = 20;
+});
+builder.Services.AddScoped<IChatRepository, ChatRepository>();
+builder.Services.AddScoped<IChatService, ChatService>();
 
 builder.Services.AddRateLimiter(options =>
 {
@@ -342,6 +370,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<ChatHub>("/hubs/chat")
+    .RequireCors(CorsPolicy);
 
 var port = Environment.GetEnvironmentVariable("PORT");
 

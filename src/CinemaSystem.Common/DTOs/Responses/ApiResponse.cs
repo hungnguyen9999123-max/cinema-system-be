@@ -7,7 +7,7 @@ public class ApiResponse<T>
     public T? Data { get; set; }
     public List<string>? Errors { get; set; }
 
-    public static ApiResponse<T> Success(T? data, string message) => new()
+    public static ApiResponse<T> Success(T? data, string message = "Success") => new()
     {
         IsSuccess = true,
         Message = message,
@@ -30,4 +30,11 @@ public class ApiResponse<T>
         Data = default,
         Errors = errors
     };
+}
+
+public static class ApiResponse
+{
+    public static ApiResponse<T> Ok<T>(T? data, string message = "Success") => ApiResponse<T>.Success(data, message);
+    public static ApiResponse<T> Fail<T>(string message) => ApiResponse<T>.Fail(message);
+    public static ApiResponse<T> Fail<T>(List<string> errors, string message) => ApiResponse<T>.Fail(errors, message);
 }

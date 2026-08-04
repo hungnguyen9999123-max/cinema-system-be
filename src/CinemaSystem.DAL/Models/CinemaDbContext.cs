@@ -20,6 +20,12 @@ public partial class CinemaDbContext : DbContext
 
     public virtual DbSet<AuditLog> AuditLogs { get; set; }
 
+    public virtual DbSet<ChatConversation> ChatConversations { get; set; }
+
+    public virtual DbSet<ChatMessage> ChatMessages { get; set; }
+
+    public virtual DbSet<ChatParticipant> ChatParticipants { get; set; }
+
     public virtual DbSet<Booking> Bookings { get; set; }
 
     public virtual DbSet<BookingSeat> BookingSeats { get; set; }
@@ -1383,6 +1389,121 @@ public partial class CinemaDbContext : DbContext
                 .HasForeignKey(d => new { d.BookingSeatId, d.BookingId })
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_TK_BOOKING_SEAT_BOOKING");
+        });
+
+        modelBuilder.Entity<ChatConversation>(entity =>
+        {
+            entity.ToTable("CHAT_CONVERSATIONS");
+
+            entity.HasIndex(e => e.Status, "IX_CHAT_CONV_STATUS");
+
+            entity.HasIndex(e => e.CreatedAt, "IX_CHAT_CONV_CREATED");
+
+            entity.Property(e => e.Id)
+                .HasDefaultValueSql("(newsequentialid())")
+                .HasColumnName("id");
+            entity.Property(e => e.Type)
+                .HasMaxLength(20)
+                .HasColumnName("type");
+            entity.Property(e => e.Title)
+                .HasMaxLength(200)
+                .HasColumnName("title");
+            entity.Property(e => e.Status)
+                .HasMaxLength(20)
+                .HasDefaultValue("ACTIVE")
+                .HasColumnName("status");
+            entity.Property(e => e.CreatedAt)
+                .HasDefaultValueSql("(sysdatetime())")
+                .HasColumnName("created_at");
+            entity.Property(e => e.ClosedAt)
+                .HasColumnName("closed_at");
+        });
+
+        modelBuilder.Entity<ChatParticipant>(entity =>
+        {
+            entity.ToTable("CHAT_PARTICIPANTS");
+
+            entity.HasIndex(e => e.ConversationId, "IX_CHAT_PART_CONV");
+
+            entity.HasIndex(e => e.UserId, "IX_CHAT_PART_USER");
+
+            entity.HasIndex(e => new { e.ConversationId, e.UserId }, "UQ_CHAT_PART_CONV_USER").IsUnique();
+
+            entity.Property(e => e.Id)
+                .HasDefaultValueSql("(newsequentialid())")
+                .HasColumnName("id");
+            entity.Property(e => e.ConversationId).HasColumnName("conversation_id");
+            entity.Property(e => e.UserId).HasColumnName("user_id");
+            entity.Property(e => e.Role)
+                .HasMaxLength(20)
+                .HasColumnName("role");
+            entity.Property(e => e.JoinedAt)
+                .HasDefaultValueSql("(sysdatetime())")
+                .HasColumnName("joined_at");
+            entity.Property(e => e.LastReadAt).HasColumnName("last_read_at");
+
+            entity.HasOne(d => d.Conversation).WithMany(p => p.Participants)
+                .HasForeignKey(d => d.ConversationId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_CHAT_PART_CONV");
+
+            entity.HasOne(d => d.User).WithMany()
+                .HasForeignKey(d => d.UserId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_CHAT_PART_USER");
+        });
+
+        modelBuilder.Entity<ChatMessage>(entity =>
+        {
+            entity.ToTable("CHAT_MESSAGES");
+
+            entity.HasIndex(e => e.ConversationId, "IX_CHAT_MSG_CONV");
+
+            entity.HasIndex(e => e.SenderId, "IX_CHAT_MSG_SENDER");
+
+            entity.HasIndex(e => e.SentAt, "IX_CHAT_MSG_SENT");
+
+            entity.HasIndex(e => new { e.ConversationId, e.SentAt }, "IX_CHAT_MSG_CONV_SENT");
+
+            entity.Property(e => e.Id)
+                .HasDefaultValueSql("(newsequentialid())")
+                .HasColumnName("id");
+            entity.Property(e => e.ConversationId).HasColumnName("conversation_id");
+            entity.Property(e => e.SenderId).HasColumnName("sender_id");
+            entity.Property(e => e.Content).HasColumnName("content");
+            entity.Property(e => e.Type)
+                .HasMaxLength(20)
+                .HasDefaultValue("TEXT")
+                .HasColumnName("type");
+            entity.Property(e => e.SentAt)
+                .HasDefaultValueSql("(sysdatetime())")
+                .HasColumnName("sent_at");
+            entity.Property(e => e.ReadAt).HasColumnName("read_at");
+            entity.Property(e => e.IsPinned)
+                .HasDefaultValue(false)
+                .HasColumnName("is_pinned");
+            entity.Property(e => e.ReplyToId).HasColumnName("reply_to_id");
+            entity.Property(e => e.AttachmentUrl)
+                .HasMaxLength(500)
+                .HasColumnName("attachment_url");
+            entity.Property(e => e.AttachmentType)
+                .HasMaxLength(50)
+                .HasColumnName("attachment_type");
+
+            entity.HasOne(d => d.Conversation).WithMany(p => p.Messages)
+                .HasForeignKey(d => d.ConversationId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_CHAT_MSG_CONV");
+
+            entity.HasOne(d => d.Sender).WithMany()
+                .HasForeignKey(d => d.SenderId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("FK_CHAT_MSG_SENDER");
+
+            entity.HasOne(d => d.ReplyTo).WithMany(p => p.Replies)
+                .HasForeignKey(d => d.ReplyToId)
+                .OnDelete(DeleteBehavior.SetNull)
+                .HasConstraintName("FK_CHAT_MSG_REPLY");
         });
 
         modelBuilder.Entity<User>(entity =>
