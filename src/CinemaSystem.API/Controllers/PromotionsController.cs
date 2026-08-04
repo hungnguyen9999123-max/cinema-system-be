@@ -153,7 +153,7 @@ public sealed class PromotionsController(IPromotionService promotionService) : C
     }
 
     [HttpPost("validate")]
-    [Authorize]
+    [Authorize(Roles = "Customer,Staff")]
     [ProducesResponseType<ApiResponse<ValidatePromotionResponse>>(StatusCodes.Status200OK)]
     [ProducesResponseType<ApiResponse<ValidatePromotionResponse>>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ApiResponse<ValidatePromotionResponse>>(StatusCodes.Status403Forbidden)]
@@ -161,15 +161,43 @@ public sealed class PromotionsController(IPromotionService promotionService) : C
         [FromBody] ValidatePromotionRequest request,
         CancellationToken cancellationToken)
     {
-        if (!User.IsInRole("Customer"))
+        Guid? customerId = null;
+
+        // Chỉ lấy CustomerId nếu là Customer
+        if (User.IsInRole("Customer"))
         {
-            return Forbid();
+            customerId = GetCurrentUserId();
         }
 
-        var customerId = GetCurrentUserId();
-        var response = await promotionService.ValidateAsync(customerId, request, cancellationToken);
-        return Ok(ApiResponse<ValidatePromotionResponse>.Success(response, response.Message));
+        var response = await promotionService.ValidateAsync(
+            customerId,
+            request,
+            cancellationToken);
+
+        return Ok(
+            ApiResponse<ValidatePromotionResponse>.Success(
+                response,
+                response.Message));
     }
+
+    // [HttpPost("validate")]
+    // [Authorize]
+    // [ProducesResponseType<ApiResponse<ValidatePromotionResponse>>(StatusCodes.Status200OK)]
+    // [ProducesResponseType<ApiResponse<ValidatePromotionResponse>>(StatusCodes.Status400BadRequest)]
+    // [ProducesResponseType<ApiResponse<ValidatePromotionResponse>>(StatusCodes.Status403Forbidden)]
+    // public async Task<ActionResult<ApiResponse<ValidatePromotionResponse>>> Validate(
+    //     [FromBody] ValidatePromotionRequest request,
+    //     CancellationToken cancellationToken)
+    // {
+    //     if (!User.IsInRole("Customer"))
+    //     {
+    //         return Forbid();
+    //     }
+
+    //     var customerId = GetCurrentUserId();
+    //     var response = await promotionService.ValidateAsync(customerId, request, cancellationToken);
+    //     return Ok(ApiResponse<ValidatePromotionResponse>.Success(response, response.Message));
+    // }
 
     private Guid? GetCurrentUserId()
     {

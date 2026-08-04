@@ -343,7 +343,7 @@ public sealed class PromotionService : IPromotionService
     /// <summary>
     /// Records a promotion usage after successful payment.
     /// </summary>
-    public async Task RecordUsageAsync(Guid bookingId, Guid customerId, Guid promotionId, CancellationToken cancellationToken = default)
+    public async Task RecordUsageAsync(Guid bookingId, Guid? customerId, Guid promotionId, CancellationToken cancellationToken = default)
     {
         if (await promotionUsageRepository.ExistsForBookingAsync(bookingId, cancellationToken))
         {
